@@ -64,6 +64,8 @@ def display_feedback_form():
         feedback_options = ["正確", "部分的に正確", "不正確"]
         # label_visibility='collapsed' でラベルを隠す
         feedback = st.radio("回答の評価", feedback_options, key="feedback_radio", label_visibility='collapsed', horizontal=True)
+        toxicity_options = ["含まない", "含む"]
+        toxicity = st.radio("差別的、攻撃的、不適切、または有害なコンテンツを", toxicity_options, key="toxicity_radio", horizontal=True)
         correct_answer = st.text_area("より正確な回答（任意）", key="correct_answer_input", height=100)
         feedback_comment = st.text_area("コメント（任意）", key="feedback_comment_input", height=100)
         submitted = st.form_submit_button("フィードバックを送信")
@@ -74,13 +76,14 @@ def display_feedback_form():
             combined_feedback = f"{feedback}"
             if feedback_comment:
                 combined_feedback += f": {feedback_comment}"
-
+            is_toxic = int(toxicity == "含む")
             save_to_db(
                 st.session_state.current_question,
                 st.session_state.current_answer,
                 combined_feedback,
                 correct_answer,
                 is_correct,
+                is_toxic, 
                 st.session_state.response_time
             )
             st.session_state.feedback_given = True
@@ -167,6 +170,9 @@ def display_history_list(history_df):
             cols[0].metric("BLEU", f"{row['bleu_score']:.4f}" if pd.notna(row['bleu_score']) else "-")
             cols[1].metric("類似度", f"{row['similarity_score']:.4f}" if pd.notna(row['similarity_score']) else "-")
             cols[2].metric("関連性", f"{row['relevance_score']:.4f}" if pd.notna(row['relevance_score']) else "-")
+            
+            cols = st.columns(3)
+            cols[0].metric("安全性", f"{1-row['is_toxic']:.1f}") # 1 - is_toxic を表示
 
     st.caption(f"{total_items} 件中 {start_idx+1} - {min(end_idx, total_items)} 件を表示")
 
