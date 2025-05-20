@@ -6,7 +6,7 @@ import pickle
 import time
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, roc_auc_score # auc_scoreの検証を追加
+from sklearn.metrics import accuracy_score, roc_auc_score  # auc_scoreの検証を追加
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
@@ -127,9 +127,11 @@ def test_model_roc_auc(train_model):
 
     # 予測確率を取得 (predict_probaが利用可能なモデルの場合)
     if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X_test)[:, 1] # 正例（クラス1）の確率
+        y_prob = model.predict_proba(X_test)[:, 1]  # 正例（クラス1）の確率
         auc = roc_auc_score(y_test, y_prob)
-        assert auc >= 0.8, f"モデルのROC AUC スコアが低すぎます: {auc}" # 例: AUCが一定以上か確認
+        assert (
+            auc >= 0.8
+        ), f"モデルのROC AUC スコアが低すぎます: {auc}"  # 例: AUCが一定以上か確認
     else:
         pytest.skip("モデルがpredict_probaをサポートしていません")
 
